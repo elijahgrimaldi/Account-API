@@ -10,17 +10,17 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/elijahgrimaldi/Account-API/handler"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
 	log.Println("Starting server on port 8080...")
 
 	router := gin.Default()
-	router.GET("/api/account", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"Hello": "World",
-		})
+	handler.NewHandler(&handler.Config{
+		R: router,
 	})
 	srv := &http.Server{
 		Addr:    ":8080",
