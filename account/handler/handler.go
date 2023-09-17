@@ -35,14 +35,6 @@ func NewHandler(c *Config) {
 	g.POST("/image", h.Image)
 	g.DELETE("/image", h.DeleteImage)
 	g.PUT("/details", h.Details)
-	g.GET("/world", h.World)
-}
-
-// Signup handler
-func (h *Handler) Signup(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's signup",
-	})
 }
 
 // Signin handler
@@ -85,11 +77,4 @@ func (h *Handler) Details(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"hello": "it's details",
 	})
-}
-
-func (h *Handler) World(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"YO": "WORLD",
-	})
-
 }

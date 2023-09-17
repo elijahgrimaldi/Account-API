@@ -89,7 +89,7 @@ func TestMe(t *testing.T) {
 		router.ServeHTTP(rr, request)
 
 		assert.Equal(t, 500, rr.Code)
-		mockUserService.AssertNotCalled(t, "Get", mock.Anything)
+		mockUserService.AssertNotCalled(t, "Get", mock.Anything, mock.Anything)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
