@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/elijahgrimaldi/Account-API/model/apperrors"
 	"github.com/gin-gonic/gin"
@@ -16,37 +17,36 @@ type invalidArgument struct {
 	Param string `json:"param"`
 }
 
-// bindData is helper function, returns false if data is not bound
+// bindData is a helper function, returns false if data is not bound
 func bindData(c *gin.Context, req interface{}) bool {
-	// Bind incoming json to struct and check for validation errors
+	// Bind incoming JSON to struct and check for validation errors
 	if err := c.ShouldBind(req); err != nil {
 		log.Printf("Error binding data: %+v\n", err)
 
 		if errs, ok := err.(validator.ValidationErrors); ok {
-			// could probably extract this, it is also in middleware_auth_user
 			var invalidArgs []invalidArgument
 
 			for _, err := range errs {
 				invalidArgs = append(invalidArgs, invalidArgument{
-					err.Field(),
-					err.Value().(string),
-					err.Tag(),
-					err.Param(),
+					Field: err.Field(),
+					Value: err.Value().(string),
+					Tag:   err.Tag(),
+					Param: err.Param(),
 				})
 			}
 
 			err := apperrors.NewBadRequest("Invalid request parameters. See invalidArgs")
 
-			c.JSON(err.Status(), gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"error":       err,
 				"invalidArgs": invalidArgs,
 			})
-			return false
+		} else {
+			// Handle other types of binding errors, e.g., invalid JSON format
+			fallBack := apperrors.NewBadRequest("Bad Request")
+
+			c.JSON(http.StatusBadRequest, gin.H{"error": fallBack})
 		}
-
-		fallBack := apperrors.NewInternal()
-
-		c.JSON(fallBack.Status(), gin.H{"error": fallBack})
 		return false
 	}
 

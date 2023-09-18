@@ -12,7 +12,7 @@ type UserService struct {
 }
 
 // SignUp implements model.UserService.
-func (*UserService) SignUp(ctx context.Context, u *model.User) error {
+func (*UserService) Signup(ctx context.Context, u *model.User) error {
 	panic("unimplemented")
 }
 

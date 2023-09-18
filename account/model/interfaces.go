@@ -8,7 +8,7 @@ import (
 
 type UserService interface {
 	Get(ctx context.Context, uid uuid.UUID) (*User, error)
-	SignUp(ctx context.Context, u *User) error
+	Signup(ctx context.Context, u *User) error
 }
 
 type UserRepository interface {
