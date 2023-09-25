@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/elijahgrimaldi/Account-API/model"
+	"github.com/elijahgrimaldi/Account-API/model/apperrors"
 	"github.com/elijahgrimaldi/Account-API/model/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -49,6 +50,69 @@ func TestUserService(t *testing.T) {
 		u, err := us.Get(ctx, uid)
 		assert.Nil(t, u)
 		assert.Error(t, err)
+		mockUserRepository.AssertExpectations(t)
+	})
+
+}
+func TestSignup(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		uid, _ := uuid.NewRandom()
+
+		mockUser := &model.User{
+			Email:    "bob@bob.com",
+			Password: "howdyhoneighbor!",
+		}
+
+		mockUserRepository := new(mocks.MockUserRepository)
+		us := NewUserService(&USConfig{
+			UserRepository: mockUserRepository,
+		})
+
+		// We can use Run method to modify the user when the Create method is called.
+		//  We can then chain on a Return method to return no error
+		mockUserRepository.
+			On("Create", mock.Anything, mockUser).
+			Run(func(args mock.Arguments) {
+				userArg := args.Get(1).(*model.User) // arg 0 is context, arg 1 is *User
+				userArg.UID = uid
+			}).Return(nil)
+
+		ctx := context.TODO()
+		err := us.Signup(ctx, mockUser)
+
+		assert.NoError(t, err)
+
+		// assert user now has a userID
+		assert.Equal(t, uid, mockUser.UID)
+
+		mockUserRepository.AssertExpectations(t)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		mockUser := &model.User{
+			Email:    "bob@bob.com",
+			Password: "howdyhoneighbor!",
+		}
+
+		mockUserRepository := new(mocks.MockUserRepository)
+		us := NewUserService(&USConfig{
+			UserRepository: mockUserRepository,
+		})
+
+		mockErr := apperrors.NewConflict("email", mockUser.Email)
+
+		// We can use Run method to modify the user when the Create method is called.
+		//  We can then chain on a Return method to return no error
+		mockUserRepository.
+			On("Create", mock.Anything, mockUser).
+			Return(mockErr)
+
+		ctx := context.TODO()
+		err := us.Signup(ctx, mockUser)
+
+		// assert error is error we response with in mock
+		assert.EqualError(t, err, mockErr.Error())
+
 		mockUserRepository.AssertExpectations(t)
 	})
 }

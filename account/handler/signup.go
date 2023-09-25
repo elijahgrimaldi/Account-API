@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/elijahgrimaldi/Account-API/model"
 	"github.com/elijahgrimaldi/Account-API/model/apperrors"
@@ -40,4 +41,19 @@ func (h *Handler) Signup(c *gin.Context) {
 		})
 		return
 	}
+
+	tokens, err := h.TokenService.NewPairFromUser(c, u, "")
+
+	if err != nil {
+		log.Printf("Failed to create tokens: %v\n", err.Error())
+		c.JSON(apperrors.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{
+		"idToken":      tokens.IDToken,
+		"refreshToken": tokens.RefreshToken,
+	})
+
 }
