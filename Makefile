@@ -1,7 +1,25 @@
-.PHONY: create-keypair
+.PHONY: create-keypair migrate-create migrate-up migrate-down migrate-force
 
 PWD = $(shell pwd)
 ACCTPATH = $(PWD)/account
+MPATH = $(ACCTPATH)/migrations
+PORT = 5432
+
+# Default number of migrations to execute up or down
+N = 1
+
+migrate-create:
+	@echo "---Creating migration files---"
+	migrate create -ext sql -dir $(MPATH) -seq -digits 5 $(NAME)
+
+migrate-up:
+	migrate -source file://$(MPATH) -database postgres://postgres:password@localhost:$(PORT)/postgres?sslmode=disable up $(N)
+
+migrate-down:
+	migrate -source file://$(MPATH) -database postgres://postgres:password@localhost:$(PORT)/postgres?sslmode=disable down $(N)
+
+migrate-force:
+	migrate -source file://$(MPATH) -database postgres://postgre
 
 create-keypair:
 	@echo "Creating an rsa 256 key pair"
